@@ -15,19 +15,19 @@ namespace SelectSearch
     class SelectSearch
     {
 
-        private Panel panel = new Panel();
-        private MaskedTextBox filter = new MaskedTextBox();
-        private ListBox list = new ListBox();
-        private Object[] items = null;
-        private TextBoxBase source;
-        private Boolean showing;
+        private Panel panel = new Panel();                      // The container for our filter and list
+        private MaskedTextBox filter = new MaskedTextBox();     // The search filter
+        private ListBox list = new ListBox();                   // The visible container of our items
+        private Object[] items = null;                          // This holds all of the items to show in the ListBox
+        private TextBoxBase source;                             // So long as the Control uses this class, it will work
+        private List<Control> controls = new List<Control>();   // List of Controls to hide/show when Select is visible/not visible
 
-        // Accepts Control that extends TextBoxBase
+        // Constructor
         public SelectSearch(TextBoxBase s, Object[] data)
         {
-            source = s;
-            items = data;
-
+            source = s;     // The TextBoxBase Control the user has selected
+            items = data;   // The items to use in the listbox
+            
             // Change properties of source
             source.ReadOnly = true;
             source.BackColor = Color.White;
@@ -38,9 +38,9 @@ namespace SelectSearch
 
             // Filter Properties
             filter.Mask = "D00000";
-            filter.MouseClick += new MouseEventHandler(filter_MouseClick); // move cursor to start of text
-            filter.TextChanged += new EventHandler(filter_TextChanged);
-            filter.SetBounds(2, 2, source.Width - 4, source.Height); // subtract 2 * the x position of this, which is 2, from width
+            filter.MouseClick += new MouseEventHandler(filter_MouseClick);      // move cursor to start of text
+            filter.TextChanged += new EventHandler(filter_TextChanged);         // Do something when the filter's text has changed
+            filter.SetBounds(2, 2, source.Width - 4, source.Height);            // subtract 2 * the x position of this, which is 2, from width
             panel.Controls.Add(filter);
 
             // ListBox Properties
@@ -58,6 +58,7 @@ namespace SelectSearch
             // Finally
             source.Parent.Controls.Add(panel);
             filter.SelectionStart = 1;
+            panel.BringToFront();
             filter.Focus();
         }
 
@@ -94,15 +95,19 @@ namespace SelectSearch
         public void hide()
         {
             panel.Hide();
-            showing = false;
+            toggleControls();
         }
 
-        // When the filter's text changes
+        // Filter our list of items to the text of the filter
         void filter_TextChanged(object sender, EventArgs e)
         {
+            // Remove any existing items from the ListBox
             list.Items.Clear();
 
+            // Add the following items
             list.Items.AddRange(
+
+                // For every object in the items[], add it to items[] if it contains the text of the filter
                 items.Where(i => i.ToString().Contains(filter.Text.Replace('D', ' ').Trim())).ToArray()
             );
         }
@@ -120,14 +125,41 @@ namespace SelectSearch
         internal void show()
         {
             panel.Show();
-            showing = true;
+            toggleControls();
             filter.Focus();
         }
 
-        // Is the panel visible?
+        // Get the visibility of the Select panel
         public bool isShowing()
         {
-            return showing;
+            return panel.Visible;
+        }
+
+        // Change the visibility of elements that get in the way
+        internal void toggleControls()
+        {
+            if (controls != null)
+            {
+                foreach (Control c in controls)
+                {
+                    c.Visible = !isShowing();
+                }
+            }
+        }
+
+        // Add a Control to be hidden later
+        public void hideControls(Control c)
+        {
+            controls.Add(c);
+        }
+
+        // Hide multiple Controls
+        public void hideControls(Control[] controls)
+        {
+            foreach (Control c in controls)
+            {
+                hideControls(c);
+            }
         }
     }
 }
