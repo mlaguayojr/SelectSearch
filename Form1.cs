@@ -31,8 +31,16 @@ namespace SelectSearch
             label1.Focus();
         }
 
-        // When the user enters the textbox
-        private void textBox1_Enter(object sender, EventArgs e)
+        // If the user clicks anywhere else on the form's background
+        private void Form1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if ( (search != null) && (search.isShowing()) )
+            {
+                search.hide();
+            }
+        }
+
+        private void textBox1_Click(object sender, EventArgs e)
         {
             // if the object was not set
             if (search == null)
@@ -45,15 +53,6 @@ namespace SelectSearch
             }
 
             search.show();
-        }
-
-        // If the user clicks anywhere else on the form's background
-        private void Form1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (search.isShowing())
-            {
-                search.hide();
-            }
         }
 
     }
