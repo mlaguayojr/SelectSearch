@@ -41,6 +41,7 @@ namespace SelectSearch
             filter.MouseClick += new MouseEventHandler(filter_MouseClick);      // move cursor to start of text
             filter.TextChanged += new EventHandler(filter_TextChanged);         // Do something when the filter's text has changed
             filter.SetBounds(2, 2, source.Width - 4, source.Height);            // subtract 2 * the x position of this, which is 2, from width
+            filter.SelectionStart = 1;
             panel.Controls.Add(filter);
 
             // ListBox Properties
@@ -54,12 +55,10 @@ namespace SelectSearch
             panel.BackColor = source.Parent.BackColor;
             panel.Controls.Add(list);
             panel.Click += new EventHandler(panel_Click);
+            panel.Visible = false;
 
             // Finally
             source.Parent.Controls.Add(panel);
-            filter.SelectionStart = 1;
-            panel.BringToFront();
-            filter.Focus();
         }
 
         // Hide panel if the user clicks in the spacing between elements of panel
@@ -117,16 +116,18 @@ namespace SelectSearch
         {
             if (filter.Text == "D")
             {
-                filter.SelectionStart = 0;
+                filter.SelectionStart = 1;
             }
+
         }
 
         // Show the panel
         internal void show()
         {
             panel.Show();
-            toggleControls();
+            panel.BringToFront();
             filter.Focus();
+            toggleControls();
         }
 
         // Get the visibility of the Select panel
@@ -148,9 +149,13 @@ namespace SelectSearch
         }
 
         // Add a Control to be hidden later
-        public void hideControls(Control c)
+        public void hideControl(Control c)
         {
-            controls.Add(c);
+            if (!controls.Contains(c))
+            {
+                controls.Add(c);
+            }
+            c.Hide();
         }
 
         // Hide multiple Controls
@@ -158,7 +163,7 @@ namespace SelectSearch
         {
             foreach (Control c in controls)
             {
-                hideControls(c);
+                hideControl(c);
             }
         }
     }
